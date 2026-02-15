@@ -46,24 +46,29 @@ export const Recorder = () => {
   };
 
   const deployNew = () => {
+    if (!providers?.providers) {
+      alert("Please connect your wallet first using the 'Secure Connect' button.");
+      console.warn("Deployment blocked: Providers not available.");
+      return;
+    }
     console.log("Starting contract deployment...");
     onDeploy();
   };
 
-  const recordResolution = async () => {
+  const record_resolution = async () => {
     if (deployedContractAPI) {
       try {
-        await deployedContractAPI.recordResolution(BigInt(yesVotes), BigInt(noVotes));
+        await deployedContractAPI.record_resolution(BigInt(yesVotes), BigInt(noVotes));
       } catch (e) {
         console.error("Failed to record resolution", e);
       }
     }
   };
 
-  const revealOutcome = async () => {
+  const reveal_outcome = async () => {
     if (deployedContractAPI) {
       try {
-        await deployedContractAPI.revealOutcome();
+        await deployedContractAPI.reveal_outcome();
       } catch (e) {
         console.error("Failed to reveal outcome", e);
       }
@@ -261,7 +266,7 @@ export const Recorder = () => {
                   </div>
 
                    <Button 
-                     onClick={recordResolution} 
+                     onClick={record_resolution} 
                      disabled={!deployedContractAPI}
                      className="w-full h-28 !bg-[#f8fafc] !text-[#020617] font-black text-3xl rounded-[2.5rem] shadow-glow transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-20 flex gap-6 shimmer relative overflow-hidden border-2 border-white/20"
                    >
@@ -337,7 +342,7 @@ export const Recorder = () => {
                   </div>
 
                    <Button 
-                     onClick={revealOutcome} 
+                     onClick={reveal_outcome} 
                      disabled={!deployedContractAPI}
                      className="w-full h-16 !bg-[#f8fafc] !text-[#020617] font-black uppercase tracking-[0.2em] text-[10px] border-none hover:opacity-90 transition-all shadow-glow rounded-[1.25rem] group"
                    >

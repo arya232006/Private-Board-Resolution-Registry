@@ -24,7 +24,10 @@ export const useContractSubscription = () => {
   const deployingRef = useRef(false);
 
   const onDeploy = (): ContractFollow | undefined => {
-    if (!deploy) return undefined;
+    if (!deploy) {
+      console.warn("Deployment provider is not available. Is the wallet connected?");
+      return undefined;
+    }
     deployingRef.current = true;
     const contractFollow = deploy.deployContract();
     setRecorderDeploymentObservable(contractFollow.observable);
