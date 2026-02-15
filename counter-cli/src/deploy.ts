@@ -4,7 +4,7 @@ import * as readline from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 import * as api from './api';
 // ✅ Import your specific config classes
-import { currentDir, UndeployedConfig, PreviewConfig, PreprodConfig } from './config';
+import { currentDir, UndeployedConfig } from './config';
 import { createLogger } from './logger';
 import 'dotenv/config';
 
@@ -25,27 +25,11 @@ async function main() {
     api.setLogger(logger);
 
     // 2. Select Network
-    console.log('Select Network:');
-    console.log('1. Local (Docker/Undeployed)');
-    console.log('2. Preview (Public Testnet)');
-    console.log('3. Preprod (Public Testnet)');
+    console.log('Using Local (Docker/Undeployed) network as default.');
     
-    const networkChoice = await rl.question('Enter choice [default: 1]: ');
-    
-    let config;
-    let networkName = 'local';
-    const isPublicNetwork = networkChoice.trim() === '2' || networkChoice.trim() === '3';
-
-    if (networkChoice.trim() === '2') {
-        config = new PreviewConfig();
-        networkName = 'preview';
-    } else if (networkChoice.trim() === '3') {
-        config = new PreprodConfig();
-        networkName = 'preprod';
-    } else {
-        config = new UndeployedConfig();
-        networkName = 'undeployed';
-    }
+    let config = new UndeployedConfig();
+    let networkName = 'undeployed';
+    const isPublicNetwork = false;
 
     console.log(`\n✅ Selected Config: ${networkName.toUpperCase()}`);
 

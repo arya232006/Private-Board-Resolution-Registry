@@ -10,15 +10,13 @@ import {
 } from "@midnight-ntwrk/midnight-js-types";
 import { createContext, useCallback, useMemo, useState } from "react";
 import { indexerPublicDataProvider } from "@midnight-ntwrk/midnight-js-indexer-public-data-provider";
-// import { levelPrivateStateProvider } from "@midnight-ntwrk/midnight-js-level-private-state-provider";
 import { Logger } from "pino";
 import type {
-  CounterCircuits,
-  CounterPrivateStateId,
+  RecorderCircuits,
+  RecorderPrivateStateId,
 } from "../api/common-types";
-import { CounterProviders } from "../api/common-types";
+import { RecorderProviders } from "../api/common-types";
 import { useWallet } from "../../wallet-widget/hooks/useWallet";
-// import { WrappedPrivateStateProvider } from "../../wallet-widget/utils/providersWrappers/privateStateProvider";
 import {
   ActionMessages,
   ProviderAction,
@@ -30,20 +28,20 @@ import {
   proofClient,
 } from "../../wallet-widget/utils/providersWrappers/proofClient";
 import { inMemoryPrivateStateProvider } from "../../wallet-widget/utils/customImplementations/in-memory-private-state-provider";
-import { CounterPrivateState } from "@eddalabs/recorder-contract";
+import { RecorderPrivateState } from "@eddalabs/recorder-contract";
 import {
   fromHex,
   toHex,
 } from "@midnight-ntwrk/compact-runtime";
 
 export interface ProvidersState {
-  privateStateProvider: PrivateStateProvider<typeof CounterPrivateStateId>;
-  zkConfigProvider?: ZKConfigProvider<CounterCircuits>;
+  privateStateProvider: PrivateStateProvider<typeof RecorderPrivateStateId>;
+  zkConfigProvider?: ZKConfigProvider<RecorderCircuits>;
   proofProvider: ProofProvider;
   publicDataProvider?: PublicDataProvider;
   walletProvider?: WalletProvider;
   midnightProvider?: MidnightProvider;
-  providers?: CounterProviders;
+  providers?: RecorderProviders;
   flowMessage?: string;
 }
 
@@ -82,17 +80,10 @@ export const Provider = ({ children, logger }: ProviderProps) => {
   );
 
   const privateStateProvider: PrivateStateProvider<
-    typeof CounterPrivateStateId
+    typeof RecorderPrivateStateId
   > = useMemo(
-    () =>
-      // new WrappedPrivateStateProvider(
-      //   levelPrivateStateProvider({
-      //     privateStateStoreName: "counter-private-state",
-      //   }),
-      //   logger
-      // ),
-      inMemoryPrivateStateProvider<string, CounterPrivateState>(),
-    [logger, status]
+    () => inMemoryPrivateStateProvider<string, RecorderPrivateState>(),
+    []
   );
 
   const publicDataProvider: PublicDataProvider | undefined = useMemo(
@@ -112,11 +103,10 @@ export const Provider = ({ children, logger }: ProviderProps) => {
 
   const zkConfigProvider = useMemo(() => {
     if (typeof window === "undefined") {
-      // Return undefined (or an appropriate fallback) if running on the server.
       return undefined;
     }
-    return new CachedFetchZkConfigProvider<CounterCircuits>(
-      `${window.location.origin}/midnight/counter`,
+    return new CachedFetchZkConfigProvider<RecorderCircuits>(
+      `${window.location.origin}/midnight/recorder`,
       fetch.bind(window),
       () => {}
     );
@@ -142,16 +132,21 @@ export const Provider = ({ children, logger }: ProviderProps) => {
             },
             async balanceTx(
               tx: UnboundTransaction,
-              ttl?: Date
+              _ttl?: Date
             ): Promise<ledger.FinalizedTransaction> {
               try {
-                logger.info(
-                  { tx, ttl },
-                  "Balancing transaction via wallet"
-                );
                 const serializedTx = toHex(tx.serialize());
-                const received =
-                  await connectedAPI.balanceUnsealedTransaction(serializedTx);
+                const cleanTx = serializedTx.toString(); // Ensure it's a primitive string
+
+                logger.info(
+                   `Balancing transaction: size ${cleanTx.length} chars. Wallet: ${shieldedAddresses?.shieldedCoinPublicKey?.substring(0, 10)}...`
+                );
+
+                if (!shieldedAddresses?.shieldedCoinPublicKey) {
+                  throw new Error("Wallet Shielded Keys are missing. Ensure your wallet is fully initialized for this network.");
+                }
+
+                const received = await connectedAPI.balanceUnsealedTransaction(cleanTx);
                 return ledger.Transaction.deserialize<
                   ledger.SignatureEnabled,
                   ledger.Proof,
@@ -162,11 +157,12 @@ export const Provider = ({ children, logger }: ProviderProps) => {
                   "binding",
                   fromHex(received.tx)
                 );
-              } catch (e) {
-                logger.error(
-                  { error: e },
-                  "Error balancing transaction via wallet"
-                );
+              } catch (e: any) {
+                const errorMsg = e?.message || String(e);
+                if (errorMsg.includes("non-zero length")) {
+                   throw new Error("Wallet returned an empty transaction. This usually means you have 0 tokens on this network or the wallet is out of sync.");
+                }
+                logger.error(`Error during wallet balancing: ${errorMsg}`);
                 throw e;
               }
             },
@@ -190,12 +186,17 @@ export const Provider = ({ children, logger }: ProviderProps) => {
             submitTx: async (
               tx: ledger.FinalizedTransaction
             ): Promise<ledger.TransactionId> => {
-              await connectedAPI.submitTransaction(toHex(tx.serialize()));
+              const txHex = toHex(tx.serialize());
+              const cleanTxHex = txHex.toString();
+              
+              logger.info("Transaction balanced. Now submitting to local node...");
+              
+              await connectedAPI.submitTransaction(cleanTxHex);
               const txIdentifiers = tx.identifiers();
-              const txId = txIdentifiers[0]; // Return the first transaction ID
+              const txId = txIdentifiers[0];
               logger.info(
-                { txIdentifiers },
-                "Submitted transaction via wallet"
+                { txId: txId.toString() },
+                "Successfully submitted transaction via wallet"
               );
               return txId;
             },
@@ -207,10 +208,7 @@ export const Provider = ({ children, logger }: ProviderProps) => {
     [connectedAPI, providerCallback, status]
   );
 
-  // Stabilize the inner providers object so it only changes when actual provider
-  // instances change (NOT when flowMessage changes). This prevents cascading
-  // recreation of DeployedTemplateManager during deploy flow messages.
-  const innerProviders: CounterProviders | undefined = useMemo(() => {
+  const innerProviders: RecorderProviders | undefined = useMemo(() => {
     return publicDataProvider && zkConfigProvider
       ? {
           privateStateProvider,

@@ -287,8 +287,8 @@ async function main() {
 
   console.log(`\n  Unshielded address: ${unshieldedKeystore.getBech32Address()}`);
 
-  if (NETWORK_ID === 'preprod') {
-    console.log('  Fund via faucet: https://faucet.preprod.midnight.network/\n');
+  if (NETWORK_ID === 'undeployed') {
+    console.log('  Fund via local script or: http://localhost:8080/\n');
   } else {
     console.log('');
   }

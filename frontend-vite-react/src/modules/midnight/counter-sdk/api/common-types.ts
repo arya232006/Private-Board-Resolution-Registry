@@ -1,4 +1,4 @@
-import { type CounterPrivateState, Counter, createPrivateState } from '@eddalabs/counter-contract';
+import { type CounterPrivateState, Counter, createPrivateState } from '@eddalabs/recorder-contract';
 import type { ImpureCircuitId } from '@midnight-ntwrk/compact-js';
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 import type { DeployedContract, FoundContract } from '@midnight-ntwrk/midnight-js-contracts';

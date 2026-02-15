@@ -10,13 +10,7 @@ import * as Rx from 'rxjs';
 
 let logDir: string;
 const network = process.env.TEST_ENV || 'undeployed';
-if (network === 'undeployed') {
-  logDir = path.resolve(currentDir, '..', 'logs', 'test-undeployed', `${new Date().toISOString()}.log`);
-} else if (network === 'preprod') {
-  logDir = path.resolve(currentDir, '..', 'logs', 'test-preprod', `${new Date().toISOString()}.log`);
-} else {
-  logDir = path.resolve(currentDir, '..', 'logs', 'test-preview', `${new Date().toISOString()}.log`);
-}
+logDir = path.resolve(currentDir, '..', 'logs', `test-${network}`, `${new Date().toISOString().replace(/:/g, '-')}.log`);
 const logger = await createLogger(logDir);
 
 describe('API', () => {

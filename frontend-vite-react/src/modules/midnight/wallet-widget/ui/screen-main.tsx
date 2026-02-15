@@ -17,20 +17,18 @@ export default function ScreenMain({ selectedNetwork, setOpen }: { selectedNetwo
         }}
       >
         {wallets.map((wallet, index) => {
-          const config = walletsListFormat[wallet.name];
-          if (!config) return null; // Skip rendering if config is not found
-          const walletKey = config.key;
-          const displayName = config.displayName;
-          const icon = config.icon;
+          const config = walletsListFormat[wallet.name.toLowerCase()];
+          const displayName = config?.displayName || wallet.name;
+          const icon = config?.icon;
 
           return (
             <WalletIcon
               key={index}
               iconReactNode={icon}
+              icon={wallet.icon}
               name={displayName}
               action={() => {
-                connectWallet(walletKey, selectedNetwork);
-                setOpen(false);
+                connectWallet(wallet.rdns, selectedNetwork);
               }}
             />
           );

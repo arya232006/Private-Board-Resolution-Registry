@@ -59,9 +59,19 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
     fs: {
       // Allow serving files from one level up from the package root
       allow: ['..'],
+    },
+  },
+  preview: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
     },
   },
 }))

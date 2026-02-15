@@ -25,25 +25,3 @@ export class UndeployedConfig implements Config {
     setNetworkId('undeployed');
   }
 }
-
-export class PreviewConfig implements Config {
-  logDir = path.resolve(currentDir, '..', 'logs', 'tui-preview', `${new Date().toISOString()}.log`);
-  indexer = 'https://indexer.preview.midnight.network/api/v3/graphql';
-  indexerWS = 'wss://indexer.preview.midnight.network/api/v3/graphql/ws';
-  node = 'https://rpc.preview.midnight.network';
-  proofServer = 'http://127.0.0.1:6300';
-  constructor() {
-    setNetworkId('preview');
-  }
-}
-
-export class PreprodConfig implements Config {
-  logDir = path.resolve(currentDir, '..', 'logs', 'tui-preprod', `${new Date().toISOString()}.log`);
-  indexer = 'https://indexer.preprod.midnight.network/api/v3/graphql';
-  indexerWS = 'wss://indexer.preprod.midnight.network/api/v3/graphql/ws';
-  node = 'https://rpc.preprod.midnight.network';
-  proofServer = 'http://127.0.0.1:6300';
-  constructor() {
-    setNetworkId('preprod');
-  }
-}

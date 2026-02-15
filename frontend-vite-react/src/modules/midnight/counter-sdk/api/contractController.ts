@@ -2,7 +2,7 @@ import { type Logger } from 'pino';
 import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
 import * as Rx from 'rxjs';
 import { CounterPrivateStateId, CounterProviders, DeployedCounterContract, emptyState, UserAction, type DerivedState } from './common-types';
-import { Counter, CounterPrivateState, createPrivateState } from '@eddalabs/counter-contract';
+import { Counter, CounterPrivateState, createPrivateState } from '@eddalabs/recorder-contract';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import { PrivateStateProvider } from '@midnight-ntwrk/midnight-js-types';
 import { CompiledContract } from '@midnight-ntwrk/compact-js';

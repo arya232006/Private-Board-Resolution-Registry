@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, statSync, copyFileSync } from 'fs';
+import { mkdirSync, readdirSync, statSync, copyFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -6,6 +6,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
 function copyDirRecursive(src, dest) {
+  if (!existsSync(src)) {
+    console.warn(`Source directory does not exist: ${src}`);
+    return;
+  }
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
     const srcPath = join(src, entry);
@@ -18,12 +22,23 @@ function copyDirRecursive(src, dest) {
   }
 }
 
-const keySrc = join(root, '..', 'counter-contract', 'src', 'managed', 'counter', 'keys');
-const keyDest = join(root, 'public', 'midnight', 'counter', 'keys');
-const zkirSrc = join(root, '..', 'counter-contract', 'src', 'managed', 'counter', 'zkir');
-const zkirDest = join(root, 'public', 'midnight', 'counter', 'zkir');
+const contracts = ['counter', 'recorder', 'voting'];
 
-copyDirRecursive(keySrc, keyDest);
-copyDirRecursive(zkirSrc, zkirDest);
+for (const contract of contracts) {
+  const keySrc = join(root, '..', 'recorder-contract', 'src', 'managed', contract, 'keys');
+  const keyDest = join(root, 'public', 'midnight', contract, 'keys');
+  const zkirSrc = join(root, '..', 'recorder-contract', 'src', 'managed', contract, 'zkir');
+  const zkirDest = join(root, 'public', 'midnight', contract, 'zkir');
+
+  if (existsSync(keySrc)) {
+    console.log(`Copying keys for ${contract}...`);
+    copyDirRecursive(keySrc, keyDest);
+  }
+  
+  if (existsSync(zkirSrc)) {
+    console.log(`Copying zkir for ${contract}...`);
+    copyDirRecursive(zkirSrc, zkirDest);
+  }
+}
 
 console.log('Contract keys and zkir files copied successfully.');

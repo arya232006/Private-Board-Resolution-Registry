@@ -1,4 +1,4 @@
-import { type Config, UndeployedConfig, currentDir, PreviewConfig, PreprodConfig } from '../../config';
+import { type Config, UndeployedConfig, currentDir } from '../../config';
 import {
   DockerComposeEnvironment,
   GenericContainer,
@@ -57,8 +57,8 @@ export function parseArgs(required: string[]): TestConfiguration {
   if (process.env.MY_PREVIEW_MNEMONIC !== undefined) {
     mnemonic = process.env.MY_PREVIEW_MNEMONIC;
   }
-
-  let cfg: Config = new PreviewConfig();
+ 
+  let cfg: Config = new UndeployedConfig();
   let env = '';
   let psMode = 'undeployed';
   let cacheFileName = '';
@@ -68,20 +68,10 @@ export function parseArgs(required: string[]): TestConfiguration {
     } else {
       throw new Error('TEST_ENV environment variable is not defined.');
     }
-    switch (env) {
-      case 'preview':
-        cfg = new PreviewConfig();
-        psMode = 'preview';
-        cacheFileName = `${seed.substring(0, 7)}-${psMode}.state`;
-        break;
-        case 'preprod':
-        cfg = new PreprodConfig();
-        psMode = 'preprod';
-        cacheFileName = `${seed.substring(0, 7)}-${psMode}.state`;
-        break;
-      default:
-        throw new Error(`Unknown env value=${env}`);
-    }
+    // Assume all environments now target undeployed/local behavior
+    cfg = new UndeployedConfig();
+    psMode = 'undeployed';
+    cacheFileName = `${seed.substring(0, 7)}-${psMode}.state`;
   }
 
   return {
@@ -181,7 +171,7 @@ export class TestEnvironment {
   getWallet = async (): Promise<WalletContext> => {
     this.logger.info('Setting up wallet');
 
-    // Use hex seed for standalone (genesis wallet), mnemonic for preview/preprod
+    // Use hex seed for standalone (genesis wallet)
     if (this.testConfig.psMode === 'undeployed') {
       this.walletContext = await api.buildWalletAndWaitForFunds(this.testConfig.dappConfig, this.testConfig.seed);
     } else {

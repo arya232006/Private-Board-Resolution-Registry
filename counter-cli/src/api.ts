@@ -11,7 +11,7 @@ import {
   type DeployedCounterContract,
 } from './common-types';
 import { type Config, contractConfig } from './config';
-import { Counter, type CounterPrivateState } from '@eddalabs/counter-contract';
+import { Counter, type CounterPrivateState } from '@eddalabs/recorder-contract';
 import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
 import * as ledger from '@midnight-ntwrk/ledger-v7';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -342,7 +342,7 @@ export const withStatus = async <T>(message: string, fn: () => Promise<T>): Prom
 /**
  * Register unshielded NIGHT UTXOs for dust generation.
  *
- * On Preprod/Preview, NIGHT tokens generate DUST over time, but only after
+ * On Local/Undeployed, NIGHT tokens generate DUST over time, but only after
  * the UTXOs have been explicitly designated for dust generation via an on-chain
  * transaction. DUST is the non-transferable fee token used by the Midnight network.
  */
@@ -481,8 +481,8 @@ ${DIV}
   Unshielded Address (send tNight here):
   ${unshieldedKeystore.getBech32Address()}
 
-  Fund your wallet with tNight from the Preprod faucet:
-  https://faucet.preprod.midnight.network/
+  Fund your wallet with tNight from the Local faucet:
+  http://localhost:8080/ (or use the fund script)
 ${DIV}
 `);
 
@@ -499,7 +499,7 @@ ${DIV}
     console.log(`    Balance: ${formatBalance(fundedBalance)} tNight\n`);
   }
 
-  // Register NIGHT UTXOs for dust generation (required for tx fees on Preprod/Preview)
+  // Register NIGHT UTXOs for dust generation (required for tx fees)
   await registerForDustGeneration(wallet, unshieldedKeystore);
 
   return { wallet, shieldedSecretKeys, dustSecretKey, unshieldedKeystore };

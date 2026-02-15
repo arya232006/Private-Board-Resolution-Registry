@@ -68,7 +68,7 @@ export class MidnightBrowserWallet {
           apiVersion: _wallet.apiVersion,
           connect: _wallet.connect,
           icon: _wallet.icon,
-          rdns: _wallet.rdns,
+          rdns: _wallet.rdns || key,
         });
       } catch (e) {
         console.log(e);

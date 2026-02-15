@@ -4,12 +4,10 @@ import IconLace from "./icons/icon-lace";
 export const walletsListFormat: {
     [key: string]: { key: string; displayName: string; icon: JSX.Element };
   } = {
-    lace: { key: "mnLace", displayName: "LACE", icon: <IconLace /> },
+    lace: { key: "lace", displayName: "LACE", icon: <IconLace /> },
   };
 
 export enum networkID {
-  UNDEPLOYED = "undeployed",
-  PREVIEW = "preview", 
-  PREPROD = "preprod",
+  TESTNET = "testnet",
   MAINNET = "mainnet"
 }
